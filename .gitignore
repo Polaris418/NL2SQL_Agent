@@ -37,6 +37,11 @@ NL2SQL Agent Frontend Development/dist/
 chroma/
 chroma_documents/
 data/
+!data/
+data/*
+!data/demo/
+data/demo/*
+!data/demo/polaris_quick_query_demo.sql
 
 config/assistant_config.json
 assistant_uvicorn_err.log
