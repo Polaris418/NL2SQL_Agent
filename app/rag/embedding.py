@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import math
+import os
 import re
 from collections import Counter
 from dataclasses import dataclass
 from hashlib import sha256
+from pathlib import Path
 from typing import Protocol
 
 try:
@@ -118,6 +120,18 @@ class SentenceTransformerEmbedding:
         self.config = config or EmbeddingConfig()
         self._model: SentenceTransformer | None = None
         self._dimensions: int | None = None
+        self._cache_folder = self._resolve_cache_folder()
+
+    @staticmethod
+    def _resolve_cache_folder() -> str:
+        configured = (
+            os.environ.get("SENTENCE_TRANSFORMERS_HOME")
+            or os.environ.get("HF_HOME")
+            or os.environ.get("TRANSFORMERS_CACHE")
+        )
+        base_path = Path(configured) if configured else Path.cwd() / ".cache" / "huggingface"
+        base_path.mkdir(parents=True, exist_ok=True)
+        return str(base_path)
     
     def _ensure_model_loaded(self) -> SentenceTransformer:
         """Lazy load the model on first use.
@@ -126,7 +140,10 @@ class SentenceTransformerEmbedding:
             Loaded SentenceTransformer model
         """
         if self._model is None:
-            self._model = SentenceTransformer(self.config.model_name)
+            self._model = SentenceTransformer(
+                self.config.model_name,
+                cache_folder=self._cache_folder,
+            )
             # Get actual dimensions from model
             self._dimensions = self._model.get_sentence_embedding_dimension()
         return self._model
