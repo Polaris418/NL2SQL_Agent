@@ -1,0 +1,106 @@
+ {
+  "global": {
+    "工具": [
+      "应用",
+      "软件",
+      "tool",
+      "tools",
+      "app"
+    ],
+    "销售额": [
+      "gmv",
+      "revenue",
+      "turnover",
+      "成交额",
+      "sales"
+    ],
+    "使用记录": [
+      "使用日志",
+      "活动日志",
+      "usage",
+      "usage log",
+      "activity",
+      "tool usage"
+    ]
+  },
+  "connections": {
+    "metadata_sample-sqlite": {
+      "用户": [
+        "buyers",
+        "shoppers"
+      ]
+    },
+    "metadata_localmysql": {
+      "广告曝光": [
+        "ad impression",
+        "曝光量",
+        "t_ad_impression"
+      ],
+      "通知": [
+        "notification",
+        "notifications",
+        "消息",
+        "t_notification"
+      ]
+    },
+    "localMysql": {
+      "工具使用": [
+        "工具使用记录",
+        "使用记录",
+        "使用日志",
+        "活动记录",
+        "tool_usage",
+        "t_tool_usage"
+      ],
+      "工具": [
+        "t_tool",
+        "应用",
+        "软件"
+      ]
+    }
+  },
+  "domains": {
+    "sales": {
+      "销售额": [
+        "gross merchandise value",
+        "gmv",
+        "revenue"
+      ],
+      "订单": [
+        "order",
+        "orders"
+      ]
+    },
+    "user": {
+      "用户": [
+        "member",
+        "customer",
+        "account"
+      ],
+      "用户行为": [
+        "用户活动",
+        "行为记录",
+        "活动记录"
+      ]
+    },
+    "tool": {
+      "工具": [
+        "app",
+        "application",
+        "tool"
+      ],
+      "使用记录": [
+        "usage",
+        "tool usage",
+        "activity log"
+      ]
+    },
+    "hr": {
+      "部门": [
+        "department",
+        "departments",
+        "team"
+      ]
+    }
+  }
+}
