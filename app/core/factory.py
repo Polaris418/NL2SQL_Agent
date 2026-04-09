@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import lru_cache
 import logging
+import os
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -191,18 +192,28 @@ def get_container() -> ServiceContainer:
         from app.rag.vector_store import ChromaVectorStore, InMemoryVectorStore
         from app.rag.embedding import DeterministicHashEmbedding, SentenceTransformerEmbedding
         
-        # 尝试使用真实的 embedding 模型，失败则使用 fallback
-        try:
-            document_embedding_config = EmbeddingConfig(
-                model_name=settings.rag_embedding_model,
-                provider="local",
-                timeout=max(15.0, settings.rag_embedding_timeout_seconds),
-            )
-            document_embedding_model = SentenceTransformerEmbedding(config=document_embedding_config)
-            LOGGER.info("Using SentenceTransformer embedding for documents")
-        except Exception as e:
-            LOGGER.warning(f"Failed to load SentenceTransformer, using fallback: {e}")
+        use_local_document_embedding = os.getenv("DOCUMENT_RAG_LOCAL_EMBEDDING", "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+
+        if use_local_document_embedding:
+            try:
+                document_embedding_config = EmbeddingConfig(
+                    model_name=settings.rag_embedding_model,
+                    provider="local",
+                    timeout=max(15.0, settings.rag_embedding_timeout_seconds),
+                )
+                document_embedding_model = SentenceTransformerEmbedding(config=document_embedding_config)
+                LOGGER.info("Using SentenceTransformer embedding for documents")
+            except Exception as e:
+                LOGGER.warning(f"Failed to load SentenceTransformer, using fallback: {e}")
+                document_embedding_model = DeterministicHashEmbedding()
+        else:
             document_embedding_model = DeterministicHashEmbedding()
+            LOGGER.info("Using deterministic hash embedding for documents")
         
         # 初始化文档向量存储
         document_vector_store = ChromaVectorStore(
