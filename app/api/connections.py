@@ -63,7 +63,7 @@ async def create_connection(
             exc,
             action="Connection creation failed",
             status_code=status.HTTP_400_BAD_REQUEST,
-            extra={"name": payload.name, "db_type": payload.db_type.value},
+            extra={"name": payload.name, "db_type": getattr(payload.db_type, "value", str(payload.db_type))},
         ) from exc
 
 

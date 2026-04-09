@@ -45,3 +45,7 @@ tmp_uvicorn_err.log
 tmp_uvicorn_out.log
 rag_schema_versions.json
 rag_telemetry.jsonl
+
+tests/
+backend/tests/
+assets/screenshots/
