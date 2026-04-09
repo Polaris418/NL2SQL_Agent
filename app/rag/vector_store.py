@@ -8,7 +8,17 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 from pathlib import Path
+import sys
 from typing import Any, Protocol
+
+try:
+    # Debian 11 ships sqlite3 < 3.35, which is too old for Chroma.
+    # Prefer the bundled modern SQLite build when available.
+    import pysqlite3 as sqlite3  # type: ignore
+
+    sys.modules["sqlite3"] = sqlite3
+except ImportError:  # pragma: no cover
+    pass
 
 try:
     import chromadb
