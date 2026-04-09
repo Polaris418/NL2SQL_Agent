@@ -188,7 +188,7 @@ def get_container() -> ServiceContainer:
     document_metadata_store = None
     document_rag = None
     try:
-        from app.rag.vector_store import ChromaVectorStore
+        from app.rag.vector_store import ChromaVectorStore, InMemoryVectorStore
         from app.rag.embedding import DeterministicHashEmbedding, SentenceTransformerEmbedding
         
         # 尝试使用真实的 embedding 模型，失败则使用 fallback
@@ -221,12 +221,29 @@ def get_container() -> ServiceContainer:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
         
-        if loop.is_running():
-            # 如果事件循环正在运行，创建任务
-            asyncio.create_task(document_vector_store.initialize())
-        else:
-            # 否则同步初始化
-            loop.run_until_complete(document_vector_store.initialize())
+        try:
+            if loop.is_running():
+                # 如果事件循环正在运行，创建任务
+                asyncio.create_task(document_vector_store.initialize())
+            else:
+                # 否则同步初始化
+                loop.run_until_complete(document_vector_store.initialize())
+        except Exception as vector_store_error:
+            LOGGER.warning(
+                "Failed to initialize Chroma document store, falling back to in-memory: %s",
+                vector_store_error,
+            )
+            document_vector_store = InMemoryVectorStore(
+                config=VectorStoreConfig(
+                    persist_directory="./chroma_documents",
+                    timeout=5.0,
+                ),
+                collection_name="assistant_knowledge",
+            )
+            if loop.is_running():
+                asyncio.create_task(document_vector_store.initialize())
+            else:
+                loop.run_until_complete(document_vector_store.initialize())
         
         # 初始化文档元数据存储
         document_metadata_store = DocumentMetadataStore(storage_path="./data/documents")
