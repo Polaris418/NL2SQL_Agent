@@ -1,0 +1,16 @@
+[Unit]
+Description=NL2SQL Agent FastAPI Backend
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/nl2sql-agent
+EnvironmentFile=/opt/nl2sql-agent/.env
+ExecStart=/opt/nl2sql-agent/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

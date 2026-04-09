@@ -36,7 +36,21 @@ import type {
 } from '../types/rag';
 import type { LLMProfileUpsert, LLMRoutingUpdate, LLMSettings, LLMTestResult } from '../types/llm';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const resolveApiBaseUrl = (): string => {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim();
+  if (configured) {
+    return configured;
+  }
+  if (typeof window !== 'undefined') {
+    const { origin, hostname } = window.location;
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return origin;
+    }
+  }
+  return 'http://localhost:8000';
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
