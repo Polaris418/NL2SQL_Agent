@@ -8,6 +8,9 @@ User=www-data
 Group=www-data
 WorkingDirectory=/opt/nl2sql-agent
 EnvironmentFile=/opt/nl2sql-agent/.env
+Environment=HOME=/opt/nl2sql-agent
+Environment=HF_HOME=/opt/nl2sql-agent/.cache/huggingface
+Environment=TRANSFORMERS_CACHE=/opt/nl2sql-agent/.cache/huggingface/transformers
 ExecStart=/opt/nl2sql-agent/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=5

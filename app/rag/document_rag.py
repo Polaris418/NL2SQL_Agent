@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from app.rag.embedding import DeterministicHashEmbedding, EmbeddingConfig
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,6 +35,9 @@ class DocumentRAG:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.collection_name = "assistant_knowledge"
+        self._fallback_embedding_model = DeterministicHashEmbedding(
+            EmbeddingConfig(model_name="deterministic-hash-fallback", dimensions=384)
+        )
 
     def parse_markdown(self, content: str) -> str:
         """Convert markdown into plain searchable text."""
@@ -83,6 +88,20 @@ class DocumentRAG:
     def generate_chunk_id(document_id: str, chunk_index: int) -> str:
         return f"{document_id}_chunk_{chunk_index}"
 
+    async def _embed_batch_with_fallback(self, texts: List[str]) -> List[List[float]]:
+        try:
+            return await self.embedding_model.embed_batch(texts)
+        except Exception as exc:
+            logger.warning("Primary document embedding failed, falling back to deterministic hash embedding: %s", exc)
+            return await self._fallback_embedding_model.embed_batch(texts)
+
+    async def _embed_query_with_fallback(self, text: str) -> List[float]:
+        try:
+            return await self.embedding_model.embed_text(text)
+        except Exception as exc:
+            logger.warning("Primary query embedding failed, falling back to deterministic hash embedding: %s", exc)
+            return await self._fallback_embedding_model.embed_text(text)
+
     async def index_document(
         self,
         document_id: str,
@@ -99,7 +118,7 @@ class DocumentRAG:
                 logger.warning("Document %s has no chunks after parsing", document_id)
                 return 0
 
-            embeddings = await self.embedding_model.embed_batch(chunks)
+            embeddings = await self._embed_batch_with_fallback(chunks)
             chunk_ids = [self.generate_chunk_id(document_id, index) for index in range(len(chunks))]
             chunk_metadata = [
                 {
@@ -134,7 +153,7 @@ class DocumentRAG:
         """Search indexed document chunks."""
 
         try:
-            query_embedding = await self.embedding_model.embed_text(query)
+            query_embedding = await self._embed_query_with_fallback(query)
             results = await self.vector_store.query(
                 query_vector=query_embedding,
                 top_k=top_k,
