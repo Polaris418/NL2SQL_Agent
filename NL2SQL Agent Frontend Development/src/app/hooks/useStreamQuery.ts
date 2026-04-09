@@ -1,10 +1,8 @@
 import { useCallback, useRef } from 'react';
 import { useChatStore } from '../store/chatStore';
 import type { QueryRequest, AgentStep } from '../types/query';
-import { normalizeAgentStep, normalizeQueryResult } from '../api/client';
+import { API_BASE_URL, normalizeAgentStep, normalizeQueryResult } from '../api/client';
 import { toast } from 'sonner';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 type SseFrame = {
   event: string;

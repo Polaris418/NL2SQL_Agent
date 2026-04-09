@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useChatStore } from '../../store/chatStore';
 import { useConnectionStore } from '../../store/connectionStore';
-import { queryApi } from '../../api/client';
+import { API_BASE_URL, queryApi } from '../../api/client';
 import { UserMessage } from './UserMessage';
 import { AssistantMessage } from './AssistantMessage';
 import { InputBar } from './InputBar';
@@ -361,7 +361,7 @@ export function ChatPanel() {
     let encounteredError = false;
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/query/stream`, {
+      const response = await fetch(`${API_BASE_URL}/api/query/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
