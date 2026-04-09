@@ -51,6 +51,10 @@ from app.rag.vector_store import VectorStoreConfig
 LOGGER = logging.getLogger("text_to_sql_agent")
 
 
+def _env_flag(name: str) -> bool:
+    return os.getenv(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 @dataclass
 class ServiceContainer:
     settings: Settings
@@ -154,16 +158,19 @@ def get_container() -> ServiceContainer:
             fallback_profile_id=routing.fallback_profile_id,
         )
 
+    schema_embedding_provider = settings.rag_embedding_provider if _env_flag("SCHEMA_RAG_LOCAL_EMBEDDING") else "fallback"
+    schema_reranker_enabled = settings.rag_reranker_enabled and _env_flag("SCHEMA_RAG_LOCAL_RERANKER")
+
     schema_retriever = SchemaRetriever(
         settings.chroma_persist_directory,
         embedding_config=EmbeddingConfig(
-            provider=settings.rag_embedding_provider,
+            provider=schema_embedding_provider,
             model_name=settings.rag_embedding_model,
             timeout=settings.rag_embedding_timeout_seconds,
         ),
         vector_store_config=VectorStoreConfig(persist_directory=settings.chroma_persist_directory),
         reranker_config=RerankerConfig(
-            enabled=settings.rag_reranker_enabled,
+            enabled=schema_reranker_enabled,
             model_name=settings.rag_reranker_model,
             timeout_seconds=settings.rag_reranker_timeout_seconds,
         ),
@@ -192,12 +199,7 @@ def get_container() -> ServiceContainer:
         from app.rag.vector_store import ChromaVectorStore, InMemoryVectorStore
         from app.rag.embedding import DeterministicHashEmbedding, SentenceTransformerEmbedding
         
-        use_local_document_embedding = os.getenv("DOCUMENT_RAG_LOCAL_EMBEDDING", "").strip().lower() in {
-            "1",
-            "true",
-            "yes",
-            "on",
-        }
+        use_local_document_embedding = _env_flag("DOCUMENT_RAG_LOCAL_EMBEDDING")
 
         if use_local_document_embedding:
             try:
