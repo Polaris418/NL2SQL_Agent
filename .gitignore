@@ -55,3 +55,4 @@ tests/
 backend/tests/
 assets/screenshots/
 /scripts/
+/releases/build/
