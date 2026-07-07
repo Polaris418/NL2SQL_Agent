@@ -1,79 +1,78 @@
 # NL2SQL Agent
 
-NL2SQL Agent 是一个面向数据分析场景的全栈 AI 系统。它把自然语言问题转成 SQL，并结合 Schema RAG、文档知识库、流式对话、模型配置、查询历史和观测能力，提供一套完整的 AI 数据查询产品。
+NL2SQL Agent 是一个面向数据分析场景的全栈自然语言转 SQL 系统。它支持用户用中文或英文提出数据问题，系统会结合数据库 Schema 检索、Prompt 模板、模型配置、SQL 执行和结果解释，完成从自然语言问题到可执行 SQL 的完整链路。
 
-## 在线演示
+在线演示：
 
 - 演示地址：[https://nl2sql.polaristools.online](https://nl2sql.polaristools.online)
 - 健康检查：[https://nl2sql.polaristools.online/health](https://nl2sql.polaristools.online/health)
 
 ## 项目定位
 
-这个项目不是单纯的 Text-to-SQL Demo，而是一套可以实际演示以下能力的系统：
+这个项目不是一个简单的 Text-to-SQL Demo，而是一套可运行、可配置、可观测的 AI 数据查询产品原型，重点覆盖：
 
-- 自然语言到 SQL 的完整链路
-- 多数据库连接管理与 Schema 同步
-- 基于数据库结构的 Schema RAG 检索增强
-- 基于 Markdown / TXT 文档的知识库检索
-- AI 助手独立配置、连接测试与流式输出
-- 历史记录、分析报表、RAG 状态页与诊断能力
-- 前后端分离部署、Nginx 反代、生产环境运行
+- 自然语言问题改写、Schema 检索、SQL 生成、执行、纠错和结果总结。
+- MySQL / MariaDB、PostgreSQL、SQLite 多数据库连接管理。
+- 基于数据库结构的 Schema RAG，支持中文表名、中文字段注释和中文问题。
+- 文档知识库检索，可作为 AI 助手的额外知识来源。
+- OpenAI-compatible、Anthropic 等外部模型接入。
+- LLM 配置、AI 助手配置、Prompt 配置和 RAG 状态管理。
+- 查询历史、分析看板、RAG telemetry、索引健康度和诊断能力。
+- 前后端分离部署，支持 Linux + systemd + Nginx 生产环境。
 
 ## 核心功能
 
-### 1. 对话式 SQL 工作台
+### 对话式 SQL 工作台
 
-- 用户输入自然语言问题
-- 系统自动重写问题、检索相关表结构、生成 SQL、执行查询
-- 返回结果表格、执行信息、图表建议和结果总结
-- 支持流式查询输出
+- 输入自然语言问题并生成 SQL。
+- 展示问题改写、Schema 检索、SQL 生成、错误修复等查询过程。
+- 返回结果表格、执行耗时、图表建议和结果摘要。
+- 支持流式查询输出、查询历史回放和手动 SQL 执行。
 
-典型问题：
+示例问题：
 
-- 统计每个部门的员工数量
-- 计算过去 30 天的订单总金额
-- 查询销售额排名前 10 的产品
-- 查询最近一周的活跃用户
-- 找出从未下单的客户
+- 统计每个部门的员工数量。
+- 计算过去 30 天的订单总金额。
+- 查询销售额排名前 10 的商品。
+- 查询最近一周的活跃用户。
+- 找出从未下单的客户。
 
-### 2. 数据库连接管理
+### 数据库连接管理
 
-- 支持 MySQL / MariaDB、PostgreSQL、SQLite
-- 支持新增、测试、删除连接
-- 支持同步数据库 Schema
-- 每个连接都可维护独立状态和缓存
+- 支持 MySQL / MariaDB、PostgreSQL、SQLite。
+- 支持新增、测试、删除连接。
+- 支持同步数据库 Schema。
+- 每个连接维护独立的 Schema、索引状态和健康信息。
 
-### 3. Schema RAG
+### Schema RAG
 
-- 在生成 SQL 前先检索相关表、字段、关系线索
-- 维护每个连接独立的索引状态、健康状态和预构建任务
-- 支持查看索引状态、重建索引、查看运行指标
-- 生产环境默认支持轻量模式，避免小内存机器被本地模型拖垮
+- 在生成 SQL 前检索相关表、字段、注释和关系。
+- 支持每个数据库连接独立构建索引。
+- 支持查看索引状态、索引健康度、构建任务、Schema 版本和 telemetry。
+- 支持 Chroma 向量存储，也提供轻量 fallback，便于低资源环境运行。
 
-### 4. 文档知识库
+### 文档知识库
 
-- 支持上传 Markdown / TXT 文档
-- 自动切块、向量化、检索
-- 可作为 AI 助手的额外知识来源
-- 在资源不足场景下支持 fallback，保证功能可用
+- 支持上传 Markdown / TXT 文档。
+- 自动切块、向量化和检索。
+- 可作为 AI 助手或业务问答的上下文来源。
+- 在向量服务不可用时支持降级策略。
 
-### 5. AI 助手
+### 模型和 Prompt 配置
 
-- 悬浮窗交互
-- 支持拖动、最小化成球
-- 支持流式回答
-- 支持模型连接测试
-- 支持独立于主系统的模型配置
+- 支持 OpenAI-compatible 接口和 Anthropic 接口。
+- 支持配置 Base URL、模型名、API Key 和路由策略。
+- 支持连接测试。
+- 支持 Prompt 模板和 few-shot 示例配置。
 
-### 6. 运维与观测
+### AI 助手
 
-- 查询历史记录
-- 分析报表
-- RAG telemetry 和索引状态页
-- 健康检查接口
-- 适配单机 Linux 生产部署
+- 提供悬浮式 AI 助手。
+- 支持流式回答。
+- 支持独立于主 NL2SQL 链路的模型配置。
+- 支持结合知识库内容回答问题。
 
-## 系统架构
+## 技术栈
 
 ### 前端
 
@@ -83,148 +82,73 @@ NL2SQL Agent 是一个面向数据分析场景的全栈 AI 系统。它把自然
 - Tailwind CSS
 - Zustand
 - Axios
+- Radix UI / shadcn 风格组件
+- Recharts
+- Monaco Editor
 
 ### 后端
 
 - FastAPI
 - Pydantic
 - SQLAlchemy
-- SQLite 元数据库
+- SQLite 元数据数据库
 - Chroma / 内存向量存储 fallback
-- sentence-transformers / 轻量 fallback embedding
+- OpenAI SDK
+- Anthropic SDK
 
-### AI 与检索
+### 检索与增强
 
-- OpenAI 兼容模型接入
-- Anthropic 接入
 - Schema RAG
 - Document RAG
-- Prompt 模板与 Few-shot 示例
-
-## 主要页面
-
-### 对话查询
-
-- 自然语言提问
-- 流式输出 SQL 查询过程
-- 结果表格与分页
-- 历史问题回放
-
-### 连接管理
-
-- 新建数据库连接
-- 测试连接
-- 同步 Schema
-- 管理当前连接
-
-### RAG 增强
-
-- 查看每连接预构建状态
-- 查看索引健康状态
-- 查看 telemetry 概览
-- 手动重建索引
-
-### 知识库管理
-
-- 上传文档
-- 查看统计信息
-- 查看文本块和向量状态
-
-### AI 助手配置
-
-- 独立模型配置
-- API Base URL 配置
-- 模型连接测试
-- AI 助手开关
-
-## 演示截图
-
-### 对话式 SQL 工作台
-![对话式 SQL 工作台](image/image.png)
-
-### SQL 生成与结果展示
-![SQL 生成与结果展示](image/image%20copy%202.png)
-
-### 数据库连接管理
-![数据库连接管理](image/image%20copy%204.png)
-
-### RAG 状态管理
-![RAG 状态管理](image/image%20copy%205.png)
-
-### 文档知识库
-![文档知识库](image/image%20copy%2010.png)
-
-### AI 助手配置与模型测试
-![AI 助手配置与模型测试](image/image%20copy%2012.png)
-
-## 示例演示数据库
-
-仓库内提供了一份适合“快速查询卡片”演示的 MariaDB / MySQL 示例库脚本：
-
-- [data/demo/polaris_quick_query_demo.sql](/Users/Administrator/Desktop/Text-to-SQL%20Agent/data/demo/polaris_quick_query_demo.sql)
-
-导入后会创建数据库：
-
-- `polaris_demo`
-
-导入方式：
-
-```bash
-mysql -uroot -p < data/demo/polaris_quick_query_demo.sql
-```
-
-它覆盖以下典型问题：
-
-- 统计每个部门的员工数量
-- 计算过去 30 天的订单总金额
-- 查询销售额排名前 10 的产品
-- 分析各地区的销售趋势
-- 找出复购率最高的客户
-- 对比本月与上月的销售业绩
-- 查询最近一周的活跃用户
-- 列出所有未完成的订单
-- 显示库存不足的商品
-- 查询每个订单的详细信息包括客户和产品
-- 找出从未下单的客户
-- 统计每个分类下的产品数量和平均价格
+- BM25 / 向量混合检索
+- Prompt 模板
+- Few-shot 示例
+- RAG telemetry 和 debug view
 
 ## 项目结构
 
 ```text
 .
-├─ app/                                   # FastAPI 主应用
-│  ├─ agent/                              # NL2SQL 主链路
-│  ├─ api/                                # HTTP API
-│  ├─ core/                               # 应用工厂、配置、依赖注入
-│  ├─ db/                                 # 数据库连接器、元数据存储
-│  ├─ llm/                                # 模型客户端
-│  ├─ prompts/                            # Prompt 模板
-│  ├─ rag/                                # RAG、向量检索、遥测
-│  └─ schemas/                            # Pydantic 数据模型
-├─ config/                                # 配置文件目录
-├─ data/                                  # 数据目录
-├─ deploy/linux/                          # Linux 直部署配置
-├─ image/                                 # README 截图资源
-├─ NL2SQL Agent Frontend Development/     # React 前端
-├─ requirements.txt                       # Python 依赖
-├─ pyproject.toml                         # Python 项目配置
-├─ docker-compose.yml
-└─ TEXT_TO_SQL_AGENT_KNOWLEDGE_BASE.md    # 项目知识库文档
+├── app/                                  # FastAPI 主应用
+│   ├── agent/                            # NL2SQL 主链路
+│   ├── api/                              # HTTP API
+│   ├── core/                             # 配置、工厂、依赖注入
+│   ├── db/                               # 数据库连接器、元数据存储
+│   ├── llm/                              # LLM 客户端
+│   ├── prompts/                          # Prompt 模板
+│   ├── rag/                              # RAG、向量检索、索引健康度
+│   └── schemas/                          # Pydantic 数据模型
+├── backend/
+│   └── scripts/                          # 示例数据和 Windows 启动脚本
+├── config/                               # 配置文件
+├── data/demo/                            # 演示数据库 SQL
+├── deploy/linux/                         # Linux 部署配置
+├── image/                                # README 截图资源
+├── NL2SQL Agent Frontend Development/    # React 前端
+├── requirements.txt                      # Python 依赖
+├── pyproject.toml                        # Python 项目配置
+├── docker-compose.yml
+└── TEXT_TO_SQL_AGENT_KNOWLEDGE_BASE.md   # 项目知识库文档
 ```
 
 ## 本地启动
 
-### 1. 启动后端
+### 1. 准备后端环境
 
-```bash
+```powershell
 python -m venv .venv
-.venv\Scripts\activate
+.\.venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env
+```
+
+启动后端：
+
+```powershell
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-默认地址：
+后端默认地址：
 
 ```text
 http://127.0.0.1:8000
@@ -232,33 +156,55 @@ http://127.0.0.1:8000
 
 ### 2. 启动前端
 
-```bash
+```powershell
 cd "NL2SQL Agent Frontend Development"
 npm install
 npm run dev
 ```
 
-默认地址：
+前端默认地址：
 
 ```text
 http://127.0.0.1:5173
 ```
 
-## Linux 服务器部署
+## 环境变量
 
-仓库内提供了非 Docker 的 Linux 直部署配置：
+复制 `.env.example` 为 `.env` 后按需修改。常见配置包括：
 
-- [deploy/linux/DEPLOY.md](/Users/Administrator/Desktop/Text-to-SQL%20Agent/deploy/linux/DEPLOY.md)
-- [deploy/linux/nl2sql-agent.service](/Users/Administrator/Desktop/Text-to-SQL%20Agent/deploy/linux/nl2sql-agent.service)
-- [deploy/linux/nl2sql-agent.nginx.conf](/Users/Administrator/Desktop/Text-to-SQL%20Agent/deploy/linux/nl2sql-agent.nginx.conf)
+- `DATABASE_URL`：元数据数据库地址。
+- `OPENAI_API_KEY`：OpenAI-compatible 模型密钥。
+- `OPENAI_BASE_URL`：OpenAI-compatible Base URL。
+- `OPENAI_MODEL`：默认模型名。
+- `ANTHROPIC_API_KEY`：Anthropic 模型密钥。
+- `RAG_LIGHTWEIGHT_MODE`：轻量 RAG 模式。
 
-当前线上环境即采用：
+具体字段以 `.env.example` 为准。
 
-- Debian
-- systemd
-- Nginx
-- 自有域名反代
-- HTTPS 证书
+## 演示数据库
+
+仓库提供了一份适合快速体验的 MariaDB / MySQL 演示数据库脚本：
+
+- [data/demo/polaris_quick_query_demo.sql](data/demo/polaris_quick_query_demo.sql)
+
+导入方式：
+
+```bash
+mysql -uroot -p < data/demo/polaris_quick_query_demo.sql
+```
+
+导入后会创建示例数据库 `polaris_demo`，可用于测试以下问题：
+
+- 统计每个部门的员工数量。
+- 计算过去 30 天的订单总金额。
+- 查询销售额排名前 10 的商品。
+- 分析各地区的销售趋势。
+- 找出复购率最高的客户。
+- 对比本月与上月的销售业绩。
+- 查询最近一周的活跃用户。
+- 列出所有未完成的订单。
+- 显示库存不足的商品。
+- 查询每个订单的详细信息，包括客户和产品。
 
 ## 主要接口
 
@@ -268,6 +214,7 @@ http://127.0.0.1:5173
 - `POST /api/query/stream`
 - `POST /api/query/sql`
 - `POST /api/query/export`
+- `POST /api/query/sql/export`
 
 ### 数据库连接
 
@@ -277,12 +224,24 @@ http://127.0.0.1:5173
 - `POST /api/connections/{connection_id}/sync`
 - `GET /api/connections/{connection_id}/schema`
 
-### RAG 与状态
+### RAG 与索引状态
 
 - `GET /api/rag/index/status`
-- `GET /api/rag/index/health/{connection_id}`
+- `GET /api/rag/index/status/{connection_id}`
 - `POST /api/rag/index/{connection_id}/rebuild`
+- `GET /api/rag/index/jobs`
+- `GET /api/rag/index/health/{connection_id}`
 - `GET /api/rag/telemetry/dashboard`
+- `GET /api/rag/telemetry/events`
+- `GET /api/rag/telemetry/summary`
+
+### LLM 设置
+
+- `GET /api/settings/llm`
+- `POST /api/settings/llm/profiles`
+- `PUT /api/settings/llm/routing`
+- `DELETE /api/settings/llm/profiles/{profile_id}`
+- `POST /api/settings/llm/test`
 
 ### AI 助手与知识库
 
@@ -294,8 +253,71 @@ http://127.0.0.1:5173
 - `GET /api/documents/stats`
 - `POST /api/documents/search`
 
-## 当前项目文档
+## 页面截图
 
-仓库保留了一份适合导入知识库的项目总文档：
+### 对话式 SQL 工作台
 
-- [TEXT_TO_SQL_AGENT_KNOWLEDGE_BASE.md](/Users/Administrator/Desktop/Text-to-SQL%20Agent/TEXT_TO_SQL_AGENT_KNOWLEDGE_BASE.md)
+![对话式 SQL 工作台](image/image.png)
+
+### SQL 生成与结果展示
+
+![SQL 生成与结果展示](image/image%20copy%202.png)
+
+### 数据库连接管理
+
+![数据库连接管理](image/image%20copy%204.png)
+
+### RAG 状态管理
+
+![RAG 状态管理](image/image%20copy%205.png)
+
+### 文档知识库
+
+![文档知识库](image/image%20copy%2010.png)
+
+### AI 助手配置
+
+![AI 助手配置](image/image%20copy%2012.png)
+
+## Linux 部署
+
+仓库提供了非 Docker 的 Linux 直接部署配置：
+
+- [deploy/linux/DEPLOY.md](deploy/linux/DEPLOY.md)
+- [deploy/linux/nl2sql-agent.service](deploy/linux/nl2sql-agent.service)
+- [deploy/linux/nl2sql-agent.nginx.conf](deploy/linux/nl2sql-agent.nginx.conf)
+
+典型生产环境：
+
+- Debian / Ubuntu
+- Python 3.11
+- systemd
+- Nginx
+- HTTPS 证书
+- 域名反向代理
+
+## 开发检查
+
+后端测试：
+
+```powershell
+pytest
+```
+
+前端构建：
+
+```powershell
+cd "NL2SQL Agent Frontend Development"
+npm run build
+```
+
+代码格式检查可使用：
+
+```powershell
+ruff check app
+```
+
+## 相关文档
+
+- [TEXT_TO_SQL_AGENT_KNOWLEDGE_BASE.md](TEXT_TO_SQL_AGENT_KNOWLEDGE_BASE.md)
+- [deploy/linux/DEPLOY.md](deploy/linux/DEPLOY.md)

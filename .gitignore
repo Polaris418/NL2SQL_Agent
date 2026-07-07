@@ -54,3 +54,4 @@ rag_telemetry.jsonl
 tests/
 backend/tests/
 assets/screenshots/
+/scripts/
